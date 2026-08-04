@@ -1,4 +1,4 @@
-# IVISION MASK
+# VISION MASK
 
 This repository is organized for an image/vision machine learning workflow with a clear separation between data, model artifacts, source code, and experimentation.
 
