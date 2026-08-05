@@ -4,13 +4,12 @@ from pathlib import Path
 
 import streamlit as st
 
-from dashboard.camera import render_camera
+from camera import render_camera
 from dashboard.charts import render_charts
 from dashboard.layout import render_footer, render_header
-from dashboard.metrics import render_metrics
+from dashboard.metrices import render_metrics
 from dashboard.session import initialize_session
 from dashboard.sidebar import render_sidebar
-
 
 st.set_page_config(
     page_title="Vision-MASK Dashboard",
