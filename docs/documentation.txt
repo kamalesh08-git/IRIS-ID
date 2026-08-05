@@ -1,0 +1,430 @@
+Masked Face Recognition System 
+
+Architecture & Methodology Documentation 
+
+ 
+
+1. Project Title 
+
+Adaptive Periocular-Based Masked Face Recognition Using RetinaFace and InsightFace (IR-50 + ArcFace) 
+
+ 
+
+2. Problem Statement 
+
+Traditional face recognition systems rely on complete facial features for identity verification. However, when a person wears a face mask, a significant portion of the face—including the nose, mouth, and jawline—is occluded, resulting in a considerable decline in recognition accuracy. 
+
+The objective of this project is to develop a robust masked face recognition system that accurately identifies individuals by leveraging periocular features (eye region) whenever a mask is detected, while using full-face recognition for unmasked individuals. 
+
+ 
+
+3. Objective 
+
+The proposed system aims to: 
+
+Detect human faces in an input image.  
+
+Perform automatic face alignment.  
+
+Detect whether the face is masked.  
+
+Perform adaptive periocular cropping for masked faces.  
+
+Generate discriminative facial embeddings using InsightFace.  
+
+Compare embeddings with a stored database.  
+
+Identify the person with high accuracy even under facial occlusion.  
+
+ 
+
+4. Proposed Architecture 
+
+                  Input Image 
+                         │ 
+                         ▼ 
+             RetinaFace Face Detector 
+       (Face Detection + Face Alignment) 
+                         │ 
+                         ▼ 
+                 Mask Detection Module 
+                   ┌─────────────┐ 
+             No Mask         Mask Detected 
+                │                   │ 
+                ▼                   ▼ 
+        Full Face Image    Adaptive Periocular Crop 
+                │                   │ 
+                └──────────┬────────┘ 
+                           ▼ 
+           InsightFace Feature Extractor 
+          (IR-50 Backbone + ArcFace Weights) 
+                           │ 
+                           ▼ 
+                512-D Feature Embedding 
+                           │ 
+                           ▼ 
+              Cosine Similarity Matching 
+                           │ 
+                           ▼ 
+               Recognized Person / Unknown 
+
+ 
+
+5. Dataset Organization 
+
+The dataset is organized person-wise to facilitate enrollment and embedding generation. 
+
+dataset/ 
+ 
+   person_001/ 
+       unmasked/ 
+           img1.jpg 
+           img2.jpg 
+           img3.jpg 
+ 
+       cropped/ 
+           crop1.jpg 
+           crop2.jpg 
+ 
+   person_002/ 
+       unmasked/ 
+       cropped/ 
+ 
+   person_003/ 
+       unmasked/ 
+       cropped/ 
+
+Unmasked Folder 
+
+Contains original face images captured under different lighting conditions, poses, and facial expressions. 
+
+Cropped Folder 
+
+Contains periocular images extracted from the aligned face, representing only the eye region. 
+
+ 
+
+6. System Components 
+
+6.1 Face Detection 
+
+The system uses RetinaFace for detecting faces within an image. 
+
+Responsibilities: 
+
+Detect human faces  
+
+Estimate facial landmarks  
+
+Handle multiple faces  
+
+Detect faces under different poses  
+
+Improve localization accuracy  
+
+Output: 
+
+Bounding Box  
+
+Five Facial Landmarks  
+
+ 
+
+6.2 Face Alignment 
+
+RetinaFace also estimates five facial landmarks. 
+
+These include: 
+
+Left Eye  
+
+Right Eye  
+
+Nose Tip  
+
+Left Mouth Corner  
+
+Right Mouth Corner  
+
+Using these landmarks, the face is aligned to a canonical orientation before feature extraction. 
+
+Benefits: 
+
+Removes rotation  
+
+Reduces pose variation  
+
+Improves embedding consistency  
+
+ 
+
+6.3 Mask Detection 
+
+The aligned face is passed through a mask detection module. 
+
+Output: 
+
+Mask Present  
+
+No Mask  
+
+This module determines which recognition pipeline should be used. 
+
+ 
+
+6.4 Adaptive Periocular Cropping 
+
+If a mask is detected, the system extracts only the periocular region. 
+
+The cropped region includes: 
+
+Eyes  
+
+Eyebrows  
+
+Upper Nose Bridge  
+
+The crop size is dynamically adjusted based on facial landmarks obtained from RetinaFace. 
+
+Advantages: 
+
+Eliminates occluded regions  
+
+Focuses on discriminative eye features  
+
+Improves recognition performance under mask occlusion  
+
+ 
+
+6.5 Feature Extraction 
+
+Feature extraction is performed using InsightFace. 
+
+Configuration: 
+
+Backbone: IR-50  
+
+Pretrained ArcFace Weights  
+
+The network converts an image into a fixed-length feature vector. 
+
+Output: 
+
+512-dimensional embedding. 
+
+Example: 
+
+[0.12, -0.43, 0.85, ..., 0.31] 
+
+Each embedding uniquely represents the facial identity. 
+
+ 
+
+6.6 Feature Database 
+
+Each registered individual has stored embeddings generated during enrollment. 
+
+Example: 
+
+Database 
+ 
+Person A 
+Embedding A 
+ 
+Person B 
+Embedding B 
+ 
+Person C 
+Embedding C 
+
+These embeddings serve as templates during recognition. 
+
+ 
+
+6.7 Face Matching 
+
+During recognition: 
+
+Generate embedding for input image.  
+
+Compare embedding with all stored embeddings.  
+
+Compute cosine similarity.  
+
+Select highest similarity score.  
+
+Apply threshold.  
+
+Decision: 
+
+If similarity ≥ threshold 
+
+→ Identity Recognized 
+
+Else 
+
+→ Unknown Person 
+
+ 
+
+7. Recognition Pipeline 
+
+Registration Phase 
+
+Person Image 
+ 
+↓ 
+ 
+RetinaFace 
+ 
+↓ 
+ 
+Face Alignment 
+ 
+↓ 
+ 
+Mask Detection 
+ 
+↓ 
+ 
+Full Face / Periocular Crop 
+ 
+↓ 
+ 
+InsightFace (IR50) 
+ 
+↓ 
+ 
+512-D Embedding 
+ 
+↓ 
+ 
+Database Storage 
+
+ 
+
+Recognition Phase 
+
+Input Image 
+ 
+↓ 
+ 
+RetinaFace 
+ 
+↓ 
+ 
+Alignment 
+ 
+↓ 
+ 
+Mask Detection 
+ 
+↓ 
+ 
+Adaptive Crop (if required) 
+ 
+↓ 
+ 
+InsightFace 
+ 
+↓ 
+ 
+Feature Embedding 
+ 
+↓ 
+ 
+Cosine Similarity 
+ 
+↓ 
+ 
+Recognized Person 
+
+ 
+
+8. Technologies Used 
+
+Component 
+
+Technology 
+
+Programming Language 
+
+Python 
+
+Deep Learning Framework 
+
+PyTorch 
+
+Face Detection 
+
+RetinaFace 
+
+Face Alignment 
+
+RetinaFace Landmarks 
+
+Feature Extraction 
+
+InsightFace 
+
+Backbone 
+
+IR-50 
+
+Loss Function 
+
+ArcFace 
+
+Similarity Metric 
+
+Cosine Similarity 
+
+Database 
+
+Vector Embedding Database 
+
+Image Processing 
+
+OpenCV 
+
+Numerical Computing 
+
+NumPy 
+
+ 
+
+9. Advantages of the Proposed System 
+
+Robust against facial masks  
+
+Automatic face alignment  
+
+High-quality facial embeddings  
+
+Adaptive eye-region recognition  
+
+Fast similarity search  
+
+Scalable database  
+
+Works with partial facial occlusion  
+
+Suitable for real-world surveillance and access control applications  
+
+ 
+
+10. Future Enhancements 
+
+Liveness detection to prevent spoofing attacks.  
+
+Real-time webcam-based recognition.  
+
+Multi-face recognition in crowded environments.  
+
+Support for sunglasses and other facial occlusions.  
+
+Integration with FAISS for large-scale vector search.  
+
+Continuous learning for incremental enrollment of new users. 
+
+ 
