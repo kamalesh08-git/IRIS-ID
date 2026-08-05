@@ -11,7 +11,6 @@ from dashboard.metrices import render_metrics
 from dashboard.session import initialize_session
 from dashboard.sidebar import render_sidebar
 
-
 st.set_page_config(
     page_title="Vision-MASK Dashboard",
     page_icon="🤖",
