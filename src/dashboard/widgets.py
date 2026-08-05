@@ -340,4 +340,3 @@ def download_button(
         mime=mime,
         use_container_width=True,
     )
-    )
