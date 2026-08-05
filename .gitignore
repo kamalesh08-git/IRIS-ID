@@ -1,9 +1,19 @@
+# Datasets
+datasets/
+
+# Processed outputs
+processed/
+
+# Models
+models/
+
+# Logs
+logs/
+
+# Python cache
 __pycache__/
 *.pyc
-.ipynb_checkpoints/
-.env
-.venv/
+
+# Virtual environment
 venv/
-.DS_Store
-models/*.pt
-models/*.pth
+.env
